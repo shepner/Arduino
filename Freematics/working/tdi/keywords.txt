@@ -1,0 +1,6 @@
+FreematicsVDL	KEYWORD1
+getOBD	KEYWORD2
+getGPS	KEYWORD2
+getMotion	KEYWORD2
+logDataSD	KEYWORD2
+
