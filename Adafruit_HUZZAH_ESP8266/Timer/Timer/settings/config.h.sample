@@ -1,0 +1,27 @@
+/*
+ * Application settings
+ */
+
+/*****************************************************************/
+
+// using #define over constants mainly because they take less memory
+
+
+#ifndef CONFIG_H
+  #define CONFIG_H
+
+  // for serial console
+  #define BAUDRATE 115200
+
+  // WiFi settings
+  #define SSID "myssid"
+  #define SSID_PASSWORD "mypassword"
+
+  // Timezone
+  #define TZHH -6
+  #define TZMM 0
+
+  // NTP server
+  #define NTPServerName "pool.ntp.org"
+
+#endif  // CONFIG_H
