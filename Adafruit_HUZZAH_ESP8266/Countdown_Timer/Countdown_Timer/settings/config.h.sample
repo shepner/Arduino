@@ -1,0 +1,26 @@
+/*
+ * Application settings
+ */
+
+/*****************************************************************/
+
+// using #define over constants mainly because they take less memory
+
+
+#ifndef CONFIG_H
+  #define CONFIG_H
+
+  // for serial console
+  //const int BAUDRATE = 115200;
+  #define BAUDRATE 115200
+
+  // Adafruit Feather HUZZAH ESP8266 pinout:
+  // https://learn.adafruit.com/assets/46249
+  // these are limited to 3.3v MAX
+  #define Light_GPIO 12
+  #define Door1_GPIO 13
+  #define Door2_GPIO 14
+
+  #define Time_Delay 600  // 10min delay in seconds
+
+#endif  // CONFIG_H
