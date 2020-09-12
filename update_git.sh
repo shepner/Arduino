@@ -1,5 +1,7 @@
 #!/bin/sh
 
+git pull origin master
+
 # git init
 git add .
 
@@ -10,7 +12,7 @@ git add .
 git status
 
 git commit -m 'automatic update'
-git remote add origin https://github.com/shepner/Arduino
+#git remote add origin https://github.com/shepner/Arduino
 #git push --force -u origin master
 git push -u origin master
 

@@ -56,7 +56,7 @@ void loop () {
     digitalWrite (Light_GPIO, HIGH);  // turn on the relay
 
     Time_TurnLightsOff = Time_Current + Time_Delay;
-    // Serial.print ("Turn lights off at: ");  system_clock.printDateTime (Time_TurnLightsOff);
+    Serial.print ("Turn lights off at: ");  system_clock.printDateTime (Time_TurnLightsOff);
        
   } else if (Time_Current.unixtime () >= Time_TurnLightsOff.unixtime ()) {
     digitalWrite (Light_GPIO, LOW);  // turn off the relay 

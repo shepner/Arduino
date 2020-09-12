@@ -48,6 +48,7 @@ IPAddress timeServerIP;
 
 CLOCK system_clock;
 DateTime Time_Current;
+DateTime Time_Previous;
 
 
 /*****************************************************************/
@@ -67,14 +68,14 @@ void setup () {
   Time_Current = Time_Previous = system_clock.now ();
 }
 
-char * split (char * input_string, char * delimiter) {
+char * split (char* input_string, char* delimiter) {
     char * output_string;
     input_string.trim();  // needed?
     output_string = input_string.substring(0,input_string.indexOf(delimiter));
     return (output_string);
 }
 
-DateTime calculate_next_run (char[30] crontab, DateTime Time_Current) {
+DateTime calculate_next_run (char* crontab, DateTime Time_Current) {
   // https://linux.die.net/man/5/crontab
   // minute(0-59) hour(0-23) day of month(1-31) month(1-12) day of week(0-7)
   // * * * * * user command
@@ -82,6 +83,7 @@ DateTime calculate_next_run (char[30] crontab, DateTime Time_Current) {
   // */2 = every 2
   // 1-5 = range 
 
+  DateTime result;
   return (result);
 }
 
