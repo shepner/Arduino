@@ -18,13 +18,14 @@
 // keep these set as float values
 
 // min safe temp for storing hot water is 140F, 122F seems to be the abs min
-#define tmpMin 125.0
+#define tmpMin 128.0
 
 // Based upon measurements, the tmpMax should set to 30F below the input temp from the boiler.
 // It is possible to use a smaller differential but this is the point of diminishing returns.
 // So if the boiler is providing 180F water, tmpMax should be 150F
 // [data](https://docs.google.com/spreadsheets/d/1dkOv5oS63TSUh5Ghl3vkvUJrviqBKV0kFPnoFjA-MRQ/edit#gid=192911922)
-#define tmpMax 140.0  // boiler outputs at 170F
+// It was noted that the ideal temp would be 136F to keep the heating cycles short and to keep the return temps low enough
+#define tmpMax 136.0  // boiler outputs at 180F
 
 // Max rate of change in temp over the span of time.  A faster drop would require the heat to be turned on.
 // Note that a minor change in temp indicates a huge amount of water has moved through the tank so need to react quickly.
