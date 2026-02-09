@@ -18,7 +18,7 @@
 // keep these set as float values
 
 // min safe temp for storing hot water is 140F, 122F seems to be the abs min
-#define tmpMin 128.0
+#define tmpMin 125.0
 
 // Based upon measurements, the tmpMax should set to 30F below the input temp from the boiler.
 // It is possible to use a smaller differential but this is the point of diminishing returns.
