@@ -15,9 +15,11 @@ constexpr uint8_t kDoor2Pin = 14;  // door signal, pulled up; LOW = door moving
 
 constexpr uint32_t kOnTimeMs = 10UL * 60UL * 1000UL;  // 10 minutes
 constexpr uint32_t kPollMs = 20;                      // loop period; also lets the CPU idle
+constexpr uint32_t kHeartbeatMs = 5000;               // status line period on serial
 
 CountdownTimer light_timer(kOnTimeMs);
 bool light_on = false;
+uint32_t last_heartbeat_ms = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -34,12 +36,16 @@ void setup() {
   pinMode(kDoor2Pin, INPUT_PULLUP);
 
   Serial.println(F("\nGarage light timer: WiFi off, millis() timing"));
+  Serial.print(F("reset reason: "));
+  Serial.println(ESP.getResetReason());
 }
 
 void loop() {
   const uint32_t now = millis();
 
-  if (digitalRead(kDoor1Pin) == LOW || digitalRead(kDoor2Pin) == LOW) {
+  const bool door1 = digitalRead(kDoor1Pin) == LOW;
+  const bool door2 = digitalRead(kDoor2Pin) == LOW;
+  if (door1 || door2) {
     light_timer.trigger(now);  // door moving: (re)start the countdown
   }
 
@@ -47,7 +53,17 @@ void loop() {
   if (want_on != light_on) {
     light_on = want_on;
     digitalWrite(kRelayPin, light_on ? HIGH : LOW);
-    Serial.println(light_on ? F("light ON") : F("light OFF"));
+    Serial.print(now / 1000);
+    Serial.println(light_on ? F("s light ON") : F("s light OFF"));
+  }
+
+  // Periodic status so a serial monitor can see the state at any moment.
+  if (static_cast<uint32_t>(now - last_heartbeat_ms) >= kHeartbeatMs) {
+    last_heartbeat_ms = now;
+    Serial.printf("up=%lus door1=%s door2=%s relay=%s remaining=%lus\n",
+                  static_cast<unsigned long>(now / 1000), door1 ? "MOVING" : "idle",
+                  door2 ? "MOVING" : "idle", light_on ? "ON" : "off",
+                  static_cast<unsigned long>(light_timer.remaining_ms(now) / 1000));
   }
 
   delay(kPollMs);  // also feeds the ESP8266 watchdog

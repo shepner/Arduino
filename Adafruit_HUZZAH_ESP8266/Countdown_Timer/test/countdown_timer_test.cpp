@@ -38,6 +38,12 @@ int main() {
     for (int i = 0; i < 1000; i++, now += 20) on &= t.update(now);   // crosses wrap
     CHECK(on); t.trigger(now); CHECK(t.update(now + D - 1)); CHECK(!t.update(now + D)); }
 
+  // remaining_ms: idle=0, counts down, 0 at expiry, correct across the wrap.
+  { CountdownTimer t(D); CHECK(t.remaining_ms(5) == 0);
+    uint32_t start = 0xFFFFFFFFUL - 1000; t.trigger(start);
+    CHECK(t.remaining_ms(start) == D);
+    CHECK(t.remaining_ms(start + 1000) == D - 1000); CHECK(t.remaining_ms(start + D) == 0); }
+
   std::printf(failures ? "%d FAILED\n" : "all tests passed\n", failures);
   return failures != 0;
 }

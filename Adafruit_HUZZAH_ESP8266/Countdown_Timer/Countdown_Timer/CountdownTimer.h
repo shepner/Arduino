@@ -27,6 +27,13 @@ class CountdownTimer {
     return active_;
   }
 
+  // Milliseconds left on a running countdown (0 if idle or expired).
+  uint32_t remaining_ms(uint32_t now_ms) const {
+    if (!active_) return 0;
+    const uint32_t elapsed = static_cast<uint32_t>(now_ms - start_ms_);
+    return elapsed >= duration_ms_ ? 0 : duration_ms_ - elapsed;
+  }
+
  private:
   uint32_t duration_ms_;
   uint32_t start_ms_ = 0;
