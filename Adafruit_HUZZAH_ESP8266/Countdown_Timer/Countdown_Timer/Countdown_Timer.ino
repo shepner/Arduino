@@ -1,68 +1,54 @@
-/*
- * Minimal Arduino library for sunrise and sunset time
- * https://github.com/dmkishi/Dusk2Dawn
- */
+// Garage light countdown timer for an Adafruit Feather HUZZAH ESP8266 with a
+// Relay FeatherWing. While either garage-door "moving" signal is asserted the
+// light relay is on; it stays on for kOnTimeMs after the last assertion.
+//
+// Time comes from millis() only: no RTC, no battery, no WiFi. See README.md.
 
-/*****************************************************************/
+#include <ESP8266WiFi.h>
 
-//#include <Arduino.h>  // dont use this
+#include "CountdownTimer.h"
 
-#ifndef CLOCK_H
-  #include "CLOCK.h"
-#endif  // CLOCK_H
+// Feather HUZZAH ESP8266 pins (3.3 V max): https://learn.adafruit.com/assets/46249
+constexpr uint8_t kRelayPin = 12;  // Relay FeatherWing signal
+constexpr uint8_t kDoor1Pin = 13;  // door signal, pulled up; LOW = door moving
+constexpr uint8_t kDoor2Pin = 14;  // door signal, pulled up; LOW = door moving
 
-// needed for DateTime
-#ifndef _RTCLIB_H_
-  #include <RTClib.h> // https://github.com/adafruit/RTClib
-#endif  // _RTCLIB_H_
+constexpr uint32_t kOnTimeMs = 10UL * 60UL * 1000UL;  // 10 minutes
+constexpr uint32_t kPollMs = 20;                      // loop period; also lets the CPU idle
 
-CLOCK system_clock;
-DateTime Time_Current;
-DateTime Time_TurnLightsOff;
-// DateTime Time_Display;
+CountdownTimer light_timer(kOnTimeMs);
+bool light_on = false;
 
-#ifndef CONFIG_H
-  #include "settings/config.h"  // this contains all of the global #defines
-#endif  // CONFIG_H
+void setup() {
+  Serial.begin(115200);
 
-/*****************************************************************/
+  // Radio is not used: stop it so it cannot associate, draw power, or crash.
+  WiFi.persistent(false);  // do not write WiFi state to flash
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
+  delay(1);
 
-void setup () {
-  Serial.begin (BAUDRATE);
-  while (!Serial) { ; }  // wait for serial port to connect. Needed for native USB port only
-  
-  pinMode (Light_GPIO, OUTPUT);  // GPIO 12
-  digitalWrite (Light_GPIO, LOW);  // turn off the relay
-  Time_TurnLightsOff = system_clock.now ();
+  digitalWrite(kRelayPin, LOW);  // set level before enabling the output: no glitch at boot
+  pinMode(kRelayPin, OUTPUT);
+  pinMode(kDoor1Pin, INPUT_PULLUP);
+  pinMode(kDoor2Pin, INPUT_PULLUP);
 
-  pinMode (Door1_GPIO, INPUT_PULLUP);  // GPIO 13; with internal pullup enabled
-  pinMode (Door2_GPIO, INPUT_PULLUP);  // GPIO 14; with internal pullup enabled
+  Serial.println(F("\nGarage light timer: WiFi off, millis() timing"));
 }
 
+void loop() {
+  const uint32_t now = millis();
 
-/*****************************************************************/
-
-void loop () {
-  Time_Current = system_clock.now ();
-
-  /*
-  if (Time_Current.unixtime () >= Time_Display.unixtime ()) {
-    Time_Display = Time_Current + 1;  // only display the time once a sec
-    Serial.print ("System time: ");  system_clock.printDateTime (Time_Current);
-  }
-  */
-
-  if ((digitalRead (Door1_GPIO) == 0) || (digitalRead (Door2_GPIO) == 0)) {  // 0 == open circuit; 1 == shorted to ground  
-    digitalWrite (Light_GPIO, HIGH);  // turn on the relay
-
-    Time_TurnLightsOff = Time_Current + Time_Delay;
-    Serial.print ("Turn lights off at: ");  system_clock.printDateTime (Time_TurnLightsOff);
-       
-  } else if (Time_Current.unixtime () >= Time_TurnLightsOff.unixtime ()) {
-    digitalWrite (Light_GPIO, LOW);  // turn off the relay 
+  if (digitalRead(kDoor1Pin) == LOW || digitalRead(kDoor2Pin) == LOW) {
+    light_timer.trigger(now);  // door moving: (re)start the countdown
   }
 
-  // delay (1000);  // remove after testing
+  const bool want_on = light_timer.update(now);
+  if (want_on != light_on) {
+    light_on = want_on;
+    digitalWrite(kRelayPin, light_on ? HIGH : LOW);
+    Serial.println(light_on ? F("light ON") : F("light OFF"));
+  }
+
+  delay(kPollMs);  // also feeds the ESP8266 watchdog
 }
-
-/*****************************************************************/
