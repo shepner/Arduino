@@ -15,7 +15,11 @@ constexpr uint8_t kDoor2Pin = 14;  // door signal, pulled up; LOW = door moving
 
 constexpr uint32_t kOnTimeMs = 10UL * 60UL * 1000UL;  // 10 minutes
 constexpr uint32_t kPollMs = 20;                      // loop period; also lets the CPU idle
-constexpr uint32_t kHeartbeatMs = 5000;               // status line period on serial
+
+// Debug aid: print a status line every kHeartbeatMs. Leave off in service; a serial
+// monitor attached to the USB port can hold the Feather in reset (see README).
+constexpr bool kDebugSerial = false;
+constexpr uint32_t kHeartbeatMs = 5000;
 
 CountdownTimer light_timer(kOnTimeMs);
 bool light_on = false;
@@ -57,8 +61,8 @@ void loop() {
     Serial.println(light_on ? F("s light ON") : F("s light OFF"));
   }
 
-  // Periodic status so a serial monitor can see the state at any moment.
-  if (static_cast<uint32_t>(now - last_heartbeat_ms) >= kHeartbeatMs) {
+  // Periodic status so a serial monitor can see the state at any moment (debug only).
+  if (kDebugSerial && static_cast<uint32_t>(now - last_heartbeat_ms) >= kHeartbeatMs) {
     last_heartbeat_ms = now;
     Serial.printf("up=%lus door1=%s door2=%s relay=%s remaining=%lus\n",
                   static_cast<unsigned long>(now / 1000), door1 ? "MOVING" : "idle",
